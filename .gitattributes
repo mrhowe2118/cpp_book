@@ -1,0 +1,15 @@
+# 统一行尾为 LF，保证 Windows / Linux / CI 三处一致
+# （否则 core.autocrlf 会让同一份文件在不同机器上 checkout 出不同行尾，
+#   以后每一次改动都会产生"整文件都变了"的假 diff）
+* text=auto eol=lf
+
+# 二进制文件不做行尾转换
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.woff binary
+*.woff2 binary
+*.exe  binary
