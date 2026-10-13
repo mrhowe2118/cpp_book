@@ -53,6 +53,16 @@ for (const section of BOOK.sections) {
 }
 
 /* 2. 所有 md 里的站内链接 */
+// 先标出哪些文件还是占位页，才能判断"链接指向了一个空页"
+const placeholderFiles = new Set()
+for (const abs of walk(DOCS)) {
+  const rel = path.relative(DOCS, abs).replace(/\\/g, '/')
+  if (fs.readFileSync(abs, 'utf8').includes(PLACEHOLDER_MARK)) placeholderFiles.add(rel)
+}
+
+const emptyLinkRefs = []
+const indexLinkRefs = []
+const sectionIndexFiles = new Set(BOOK.sections.map((s) => fileOf(s.link)))
 const linkPattern = /\]\((\/[^)\s#]*)/g
 for (const abs of walk(DOCS)) {
   const rel = path.relative(DOCS, abs).replace(/\\/g, '/')
@@ -66,6 +76,11 @@ for (const abs of walk(DOCS)) {
     const hit = candidates.find((c) => allFiles.has(c))
     if (!hit && !target.startsWith('/assets') && !target.startsWith('/logo')) {
       errors.push(`${rel} 里的链接指向不存在的页面：${target}`)
+    } else if (hit && placeholderFiles.has(hit) && !placeholderFiles.has(rel)) {
+      // 已写好的章节引用了一个还是占位的页面 —— 读者点进去会看到"仍在写作中"
+      // 导读页列出整章目录是有意为之，单独统计
+      if (sectionIndexFiles.has(rel)) indexLinkRefs.push(`${rel} → ${hit}`)
+      else emptyLinkRefs.push(`${rel} → ${hit}`)
     }
   }
 }
@@ -101,6 +116,25 @@ console.log(`进度：已写 ${written} 篇 / 占位 ${placeholder} 篇（共 ${
 if (warnings.length) {
   console.log(`\n提示（${warnings.length}）：`)
   for (const w of warnings) console.log(`  - ${w}`)
+}
+
+// 正文章节引用空页：读者顺着正文点进去会看到"仍在写作中"——这是真正要清的
+if (emptyLinkRefs.length) {
+  const targets = [...new Set(emptyLinkRefs.map((r) => r.split(' → ')[1]))]
+  console.log(`\n⚠ 正文引用到占位页 ${emptyLinkRefs.length} 处，涉及 ${targets.length} 个页面：`)
+  for (const t of targets) {
+    console.log(`  · ${t}`)
+    for (const r of emptyLinkRefs.filter((x) => x.endsWith(` ${t}`))) {
+      console.log(`      ← ${r.split(' → ')[0]}`)
+    }
+  }
+} else {
+  console.log('\n✓ 没有任何正文章节引用到占位页')
+}
+
+// 导读页列出整章目录是有意为之，只计数不展开
+if (indexLinkRefs.length) {
+  console.log(`（另有各章导读页列出全目录产生的 ${indexLinkRefs.length} 处引用，属预期）`)
 }
 
 if (errors.length) {

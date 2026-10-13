@@ -1,8 +1,8 @@
 {
   "name": "tom-cppbook",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "Tom 的 C++ 竞赛书 —— 信奥赛教练 tom 老师的 CSP-J/S 入门书",
+  "description": "Tom 的 C++ 竞赛书 —— 信奥赛教练 tom 老师的 CSP-J/S 入门书（全书 80 页）",
   "type": "module",
   "scripts": {
     "dev": "vitepress dev docs",
