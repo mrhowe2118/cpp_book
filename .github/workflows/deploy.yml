@@ -1,0 +1,61 @@
+name: 构建并部署到 GitHub Pages
+
+# 推送到 main 分支时自动构建站点并发布
+# 使用前请在仓库 Settings → Pages 里把 Source 设为 "GitHub Actions"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只跑一个部署，避免互相覆盖
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 内容体检（死链 / 体例）
+        run: npm run check
+
+      - name: 代码示例体检（真编译 + 对答案）
+        run: npm run examples
+
+      - name: 构建站点
+        # 项目页需要子路径前缀；若是用户页（username.github.io）改成 "/"
+        env:
+          BOOK_BASE: /${{ github.event.repository.name }}/
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

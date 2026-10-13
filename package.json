@@ -1,0 +1,24 @@
+{
+  "name": "tom-cppbook",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tom 的 C++ 竞赛书 —— 信奥赛教练 tom 老师的 CSP-J/S 入门书",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs",
+    "serve": "node tools/serve.mjs",
+    "pdf": "node tools/build-pdf.mjs",
+    "scaffold": "node tools/scaffold.mjs",
+    "check": "node tools/check-content.mjs",
+    "examples": "node tools/check-examples.mjs",
+    "identifiers": "node tools/check-identifiers.mjs"
+  },
+  "devDependencies": {
+    "markdown-it": "^14.3.2",
+    "markdown-it-container": "^4.0.0",
+    "shiki": "^2.5.0",
+    "vitepress": "^1.6.4"
+  }
+}
