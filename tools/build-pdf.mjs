@@ -100,7 +100,7 @@ const PRINT_CSS = `
   --green: #15803d;
   --red: #b91c1c;
   --slate: #475569;
-  --brand: #1d4ed8;
+  --brand: #253c7d;
 }
 
 * { box-sizing: border-box; }
@@ -115,7 +115,7 @@ body {
 
 /* ---------- 封面 ---------- */
 .cover { height: 245mm; display: flex; flex-direction: column; justify-content: center; text-align: center; break-after: page; }
-.cover .mark { width: 64px; height: 64px; margin: 0 auto 28px; }
+.cover .mark { display: block; width: 92px; height: auto; margin: 0 auto 26px; }
 .cover h1 { font-size: 30pt; margin: 0 0 10px; color: var(--brand); border: none; }
 .cover .sub { font-size: 13pt; color: var(--muted); margin-bottom: 6px; }
 .cover .author { font-size: 11pt; color: var(--muted); margin-top: 26px; }
@@ -233,11 +233,21 @@ th { background: #f1f4f8; font-weight: 700; }
  * 3. 组装 HTML
  * ------------------------------------------------------------------ */
 
-const COVER_SVG = `<svg class="mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect x="2" y="2" width="60" height="60" rx="14" fill="#1d4ed8"/>
-  <path d="M16 20h32v8H38v22h-9V28H16z" fill="#ffffff"/>
-  <circle cx="50" cy="50" r="6" fill="#f59e0b"/>
-</svg>`
+/**
+ * 封面用的 logo。
+ *
+ * 打印 HTML 是【自包含单文件】（不引用任何外部资源），所以 logo 必须内嵌成
+ * data URI —— 用相对路径的话，Chrome 打印时取不到图。
+ * 这份资源由 docs/public/logo.png 生成（裁自 Tom信奥 原始 logo 的熊）。
+ */
+function coverLogo() {
+  const file = path.join(DOCS, 'public', 'logo.png')
+  if (!fs.existsSync(file)) return ''
+  const b64 = fs.readFileSync(file).toString('base64')
+  return `<img class="mark" alt="Tom信奥" src="data:image/png;base64,${b64}">`
+}
+
+const COVER_LOGO = coverLogo()
 
 function collectChapterFiles() {
   const list = []
@@ -314,7 +324,7 @@ const html = `<!DOCTYPE html>
 </head>
 <body>
 <div class="cover">
-  ${COVER_SVG}
+  ${COVER_LOGO}
   <h1>${BOOK.title}</h1>
   <div class="sub">${BOOK.description}</div>
   <div class="rule"></div>

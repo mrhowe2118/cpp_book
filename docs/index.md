@@ -6,8 +6,8 @@ hero:
   text: 从第一次编译，到考场上不丢分
   tagline: 面向 CSP-J/S 的 C++ 竞赛入门书。以题带知识点，每一节都给你能跑起来的代码。
   image:
-    src: /logo.svg
-    alt: Tom 的 C++ 竞赛书
+    src: /logo.png
+    alt: Tom信奥
   actions:
     - theme: brand
       text: 从零开始

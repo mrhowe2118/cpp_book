@@ -4,6 +4,9 @@
  * 配色沿用作者的语义色体系（跨动画/白板/本书一致）：
  *   橙 = 当前要注意的（易错点）   绿 = 已确定的信息（数据范围/给分）
  *   红 = 关键的、救命的（考场动作）灰蓝 = 结构性信息（关卡）
+ *
+ * 品牌色取自 Tom信奥 logo 的深海军蓝 #253C7D（实测：对白底对比度 10.39:1）。
+ * 深色主题必须换成同色相的浅蓝 —— 深蓝在 #1b1b1f 上只有 1.65:1，等于看不见。
  */
 
 :root {
@@ -12,11 +15,13 @@
   --vp-font-family-mono: 'JetBrains Mono', 'Cascadia Code', 'Consolas', 'Courier New',
     'Microsoft YaHei', monospace;
 
-  --vp-c-brand-1: #1d4ed8;
-  --vp-c-brand-2: #2563eb;
-  --vp-c-brand-3: #3b82f6;
-  --vp-c-brand-soft: rgba(37, 99, 235, 0.14);
+  /* 品牌深海军蓝 —— 与 logo 同色 */
+  --vp-c-brand-1: #253c7d;
+  --vp-c-brand-2: #2e4a9c;
+  --vp-c-brand-3: #253c7d;
+  --vp-c-brand-soft: rgba(37, 60, 125, 0.14);
 
+  --tom-navy: #253c7d;
   --tom-orange: #d97706;
   --tom-green: #15803d;
   --tom-red: #b91c1c;
@@ -24,11 +29,13 @@
 }
 
 .dark {
-  --vp-c-brand-1: #7aa2ff;
-  --vp-c-brand-2: #5b8def;
-  --vp-c-brand-3: #3b82f6;
-  --vp-c-brand-soft: rgba(122, 162, 255, 0.16);
+  /* 深色主题下的浅蓝变体，与品牌色同色相，对比度 7.30:1 */
+  --vp-c-brand-1: #8fa8e8;
+  --vp-c-brand-2: #a8bcec;
+  --vp-c-brand-3: #3d5aa8;
+  --vp-c-brand-soft: rgba(143, 168, 232, 0.16);
 
+  --tom-navy: #8fa8e8;
   --tom-orange: #fbbf24;
   --tom-green: #4ade80;
   --tom-red: #f87171;

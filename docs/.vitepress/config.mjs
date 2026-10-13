@@ -32,9 +32,12 @@ export default defineConfig({
   base: process.env.BOOK_BASE || '/',
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/png', href: '/favicon.png' }],
+    ['link', { rel: 'alternate icon', href: '/favicon.ico' }],
+    ['link', { rel: 'apple-touch-icon', href: '/logo-128.png' }],
     ['meta', { name: 'author', content: BOOK.author }],
-    ['meta', { name: 'theme-color', content: '#1d4ed8' }]
+    // 与 logo 同色（浏览器地址栏/移动端状态栏）
+    ['meta', { name: 'theme-color', content: '#253C7D' }]
   ],
 
   markdown: {
@@ -43,7 +46,12 @@ export default defineConfig({
   },
 
   themeConfig: {
-    logo: '/logo.svg',
+    // 深色主题下深蓝 logo 会"消失"（对比度仅 1.65:1），所以给一套浅蓝变体
+    logo: {
+      light: '/logo.png',
+      dark: '/logo-dark.png',
+      alt: 'Tom信奥'
+    },
     siteTitle: 'Tom 的 C++ 竞赛书',
 
     nav: [
