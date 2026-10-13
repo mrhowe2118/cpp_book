@@ -164,6 +164,43 @@ code {
 }
 .shiki { background: var(--code-bg) !important; }
 
+/* ---- 代码块教学标注 ----------------------------------------------
+ * class 名与站点保持一致（行高亮 / 焦点 / 增删 / 警示 / 行号），
+ * 所以正文里同一处标注，书上和投影上是同一个意思。
+ * 打印时把每行做成块级元素，整行底色才铺得满。
+ * ----------------------------------------------------------------- */
+pre .line { display: block; }
+
+pre .line.highlighted { background: #fff3bf; }
+pre .line.highlighted.warning { background: #fff8c5; }
+pre .line.highlighted.error { background: #ffd7d5; }
+
+pre.has-focused-lines .line:not(.has-focus) { opacity: 0.45; }
+
+pre .line.diff.add { background: #dafbe1; }
+pre .line.diff.add::before { content: '+ '; color: #1a7f37; font-weight: 700; }
+pre .line.diff.remove { background: #ffebe9; opacity: 0.85; }
+pre .line.diff.remove::before { content: '- '; color: #cf222e; font-weight: 700; }
+
+/* 行号：用计数器而不是绝对定位的列 —— 打印时 pre 会折行，列会错位 */
+.line-numbers-mode code { counter-reset: book-line; }
+.line-numbers-mode code .line::before {
+  counter-increment: book-line;
+  content: counter(book-line);
+  display: inline-block;
+  width: 20px;
+  margin-right: 7px;
+  text-align: right;
+  color: #8b949e;
+}
+
+/* 代码分组：PDF 里没有标签页，改成"带标题的堆叠" */
+.vp-code-group { margin: 10px 0; break-inside: avoid; }
+.code-group-item { margin: 8px 0; }
+.code-group-label {
+  margin: 0 0 3px; font-size: 9pt; font-weight: 700; color: var(--muted);
+}
+
 /* 表格 */
 table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 9.2pt; break-inside: avoid; }
 th, td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; vertical-align: top; }
@@ -221,7 +258,7 @@ function collectChapterFiles() {
 }
 
 const md = new MarkdownIt({ html: true, linkify: false, typographer: false })
-setupMarkdown(md)
+setupMarkdown(md, { codeAnnotations: true })
 headingAnchorPlugin(md)
 
 const highlight = await makeHighlighter()

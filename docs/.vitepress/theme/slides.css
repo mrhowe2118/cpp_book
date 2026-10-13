@@ -1,0 +1,344 @@
+/* ==================================================================
+ * 课堂演示模式
+ * ------------------------------------------------------------------
+ * 与「站点正文」的关系：演示时复用的是页面上已渲染好的 .vp-doc 内容，
+ * 所以这里主要是【放大排版】和【加强对比度】，不重新实现内容样式。
+ *
+ * 设计基准：1920×1080 的画布，整体等比缩放到实际屏幕 ——
+ * 这样在 1366×768 的老投影仪和 2K 屏上，字号比例是一致的。
+ * ================================================================== */
+
+/* ---------- 入口按钮：平时低调，打印时隐藏 ---------- */
+.slide-launch {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 60;
+  padding: 8px 16px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 999px;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.42;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.slide-launch:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* ---------- 舞台：铺满视口 ---------- */
+.slide-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0b0e14;
+  overflow: hidden;
+}
+
+.slide-canvas {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform-origin: center center;
+  background: var(--vp-c-bg);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- 页眉 ---------- */
+.slide-head {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  padding: 30px 64px 0;
+  flex: none;
+}
+.slide-head-chapter {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--vp-c-text-2);
+}
+.slide-head-section {
+  font-size: 20px;
+  color: var(--vp-c-text-3);
+}
+.slide-head-section::before {
+  content: '›';
+  margin-right: 10px;
+  opacity: 0.6;
+}
+.slide-head-count {
+  margin-left: auto;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  color: var(--vp-c-text-3);
+}
+
+/* ---------- 封面 ---------- */
+.slide-cover {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 0 96px;
+}
+.slide-cover h2 {
+  margin: 0;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 88px !important;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--vp-c-text-1);
+}
+.slide-cover-hint {
+  margin: 0;
+  font-size: 22px;
+  color: var(--vp-c-text-3);
+}
+
+/* 封面里的章前引语：比正文小一号，居中，不要抢标题 */
+.slide-cover-lead {
+  max-width: 1200px;
+  text-align: center;
+  transform-origin: top center;
+}
+.slide-stage .slide-cover-lead.vp-doc,
+.slide-stage .slide-cover-lead.vp-doc p,
+.slide-stage .slide-cover-lead.vp-doc li {
+  font-size: 26px;
+  line-height: 1.6;
+}
+.slide-stage .slide-cover-lead.vp-doc .custom-block {
+  text-align: left;
+  margin-top: 12px;
+}
+.slide-stage .slide-cover-lead.vp-doc .custom-block p,
+.slide-stage .slide-cover-lead.vp-doc .custom-block li {
+  font-size: 25px;
+}
+
+/* ---------- 正文：放大排版 ---------- */
+.slide-body {
+  flex: 1;
+  padding: 16px 64px 40px;
+  overflow: hidden;
+}
+
+.slide-content {
+  transform-origin: top center;
+}
+
+/* 基础字号整体放大 —— 这是"后排看得清"的关键 */
+.slide-stage .slide-content.vp-doc {
+  font-size: 30px;
+  line-height: 1.62;
+}
+.slide-stage .slide-content.vp-doc > *:first-child {
+  margin-top: 0 !important;
+}
+
+.slide-stage .slide-content.vp-doc h1 {
+  font-size: 54px;
+  margin: 0 0 20px;
+  border-top: none;
+  padding-top: 0;
+}
+.slide-stage .slide-content.vp-doc h2 {
+  font-size: 46px;
+  margin: 8px 0 22px;
+  padding-top: 0;
+  border-top: none;
+}
+.slide-stage .slide-content.vp-doc h3 {
+  font-size: 38px;
+  margin: 18px 0 16px;
+}
+.slide-stage .slide-content.vp-doc h4 {
+  font-size: 32px;
+  margin: 16px 0 12px;
+}
+
+.slide-stage .slide-content.vp-doc p,
+.slide-stage .slide-content.vp-doc li {
+  font-size: 30px;
+  line-height: 1.62;
+}
+.slide-stage .slide-content.vp-doc ul,
+.slide-stage .slide-content.vp-doc ol {
+  padding-left: 1.3em;
+}
+.slide-stage .slide-content.vp-doc li + li {
+  margin-top: 8px;
+}
+
+/* 行内代码与代码块 */
+.slide-stage .slide-content.vp-doc :not(pre) > code {
+  font-size: 26px;
+}
+.slide-stage .slide-content.vp-doc div[class*='language-'] pre,
+.slide-stage .slide-content.vp-doc pre {
+  font-size: 25px;
+  line-height: 1.55;
+  padding: 20px 26px;
+}
+.slide-stage .slide-content.vp-doc pre code {
+  font-size: inherit;
+}
+
+/* 表格 */
+.slide-stage .slide-content.vp-doc table {
+  display: table;
+  width: 100%;
+  font-size: 26px;
+  margin: 16px 0;
+}
+.slide-stage .slide-content.vp-doc th,
+.slide-stage .slide-content.vp-doc td {
+  padding: 10px 16px;
+}
+
+/* 引用块 */
+.slide-stage .slide-content.vp-doc blockquote {
+  font-size: 28px;
+  padding: 4px 0 4px 20px;
+  margin: 16px 0;
+}
+
+/* ---------- 自定义容器：演示时也放大 ---------- */
+.slide-stage .slide-content.vp-doc .custom-block {
+  padding: 20px 26px;
+  margin: 20px 0;
+  border-radius: 10px;
+}
+.slide-stage .slide-content.vp-doc .custom-block-title {
+  font-size: 30px;
+  margin-bottom: 12px;
+}
+.slide-stage .slide-content.vp-doc .custom-block p,
+.slide-stage .slide-content.vp-doc .custom-block li {
+  font-size: 29px;
+}
+
+/* ---------- 教学标注：投影时加强对比度 ----------
+ * class 与 VitePress 原生 / PDF 插件输出保持一致，
+ * 所以正文里同一处标注，书上、屏幕上、投影上表达的是同一个意思。 */
+.slide-stage .slide-content.vp-doc .vp-code .line.highlighted {
+  background: rgba(217, 119, 6, 0.24);
+}
+.slide-stage .slide-content.vp-doc .vp-code .line.highlighted.warning {
+  background: rgba(217, 119, 6, 0.3);
+}
+.slide-stage .slide-content.vp-doc .vp-code .line.highlighted.error {
+  background: rgba(185, 28, 28, 0.22);
+}
+/* 焦点：其余行压得更暗（默认是 blur + 0.7，投影上看不出来） */
+.slide-stage .slide-content.vp-doc .has-focused-lines .line:not(.has-focus),
+.slide-stage .slide-content.vp-doc div[class*='language-']:hover .has-focused-lines .line:not(.has-focus) {
+  filter: none;
+  opacity: 0.32;
+}
+.slide-stage .slide-content.vp-doc .vp-code .line.diff.add {
+  background: rgba(21, 128, 61, 0.2);
+}
+.slide-stage .slide-content.vp-doc .vp-code .line.diff.remove {
+  background: rgba(185, 28, 28, 0.16);
+  opacity: 0.85;
+}
+
+/* code-group 标签在投影上也要大一点 */
+.slide-stage .slide-content.vp-doc .vp-code-group .tabs label {
+  font-size: 22px;
+}
+.slide-stage .slide-content.vp-doc .vp-code-group .tabs {
+  padding: 0 16px;
+}
+
+/* ---------- 进度条 ---------- */
+.slide-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  background: rgba(128, 128, 128, 0.18);
+}
+.slide-progress > i {
+  display: block;
+  height: 100%;
+  background: var(--vp-c-brand-1);
+  transition: width 0.22s ease;
+}
+
+/* ---------- 控制条 ---------- */
+.slide-controls {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(18, 22, 30, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(6px);
+  opacity: 0.2;
+  transition: opacity 0.2s;
+}
+.slide-controls:hover {
+  opacity: 1;
+}
+.slide-controls button {
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: transparent;
+  color: #e6edf7;
+  font-size: 13px;
+  cursor: pointer;
+}
+.slide-controls button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+.slide-controls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.slide-controls-count {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: #9aa7b8;
+  min-width: 56px;
+  text-align: center;
+}
+.slide-controls-exit {
+  border-color: rgba(248, 113, 113, 0.4) !important;
+  color: #fca5a5 !important;
+}
+
+/* ---------- 打印 / PDF：演示相关元素一律不出现 ---------- */
+@media print {
+  .slide-launch,
+  .slide-stage,
+  .slide-controls {
+    display: none !important;
+  }
+}
+
+/* ---------- 窄屏（手机预览）不提供演示入口 ---------- */
+@media (max-width: 640px) {
+  .slide-launch {
+    display: none;
+  }
+}
