@@ -27,6 +27,17 @@ const warnings = []
 /** 体例要求：每一节都该有的小标题 */
 const REQUIRED_SECTIONS = ['本节学会什么', '立即练习']
 
+/**
+ * 查阅型页面：按主题罗列、供随时翻查，不承担"一节六段"的教学推进，
+ * 因此不要求「本节学会什么 / 立即练习」。
+ *
+ * 逐条登记具体文件，不要按目录一刀切 —— 附录里其余各篇仍是正文体例，
+ * 整目录豁免等于把这些页面的体例检查也关掉了。
+ */
+const STYLE_EXEMPT = new Set([
+  'appendix/conventions.md' // 本书约定与符号：全书的说明书
+])
+
 function walk(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const abs = path.join(dir, entry.name)
@@ -99,9 +110,9 @@ for (const abs of walk(DOCS)) {
     continue
   }
   written++
-  // 章节导读页只需要目录，不强制正文体例
+  // 章节导读页只需要目录，查阅型页面按主题罗列，都不强制正文体例
   const isSectionIndex = BOOK.sections.some((s) => fileOf(s.link) === rel)
-  if (isSectionIndex) continue
+  if (isSectionIndex || STYLE_EXEMPT.has(rel)) continue
   const missing = REQUIRED_SECTIONS.filter((h) => !body.includes(h))
   if (missing.length) missingStyle.push(`${rel}（缺：${missing.join('、')}）`)
 }

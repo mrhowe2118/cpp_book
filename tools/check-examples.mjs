@@ -33,11 +33,31 @@ import { fileURLToPath } from 'node:url'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const DOCS = path.join(ROOT, 'docs')
-const WORK = path.join(ROOT, '.example-check')
 const PLACEHOLDER_MARK = '<!-- placeholder -->'
 
-fs.rmSync(WORK, { recursive: true, force: true })
-fs.mkdirSync(WORK, { recursive: true })
+/**
+ * 每次运行都新建一个独占的临时目录（系统临时区，不在仓库里）。
+ *
+ * 早先固定用仓库下的 `.example-check/`，每轮开头先 rmSync 再重建 ——
+ * 一旦上一轮没删干净（进程被杀、或环境拦截批量删除），
+ * 下一轮就会在开头那一行直接失败，而且残留文件会越堆越多。
+ * mkdtemp 生成的目录天然只属于这次运行，既不需要"先清空"，也不会互相干扰。
+ */
+const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'tom-cppbook-ex-'))
+
+/**
+ * 收尾只删自己刚建的那个目录。
+ * 受限环境会拦截批量删除（一次几百个文件），所以失败时只提示路径，
+ * 不能让"清理没做成"把一次成功的体检变成失败。
+ */
+function cleanup() {
+  try {
+    fs.rmSync(WORK, { recursive: true, force: true })
+  } catch {
+    console.log(`\n（临时目录未能自动清理：${WORK}）`)
+  }
+}
+process.on('exit', cleanup)
 
 function walk(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -344,8 +364,6 @@ if (runFailures.length) {
     console.log(`  ✗ ${f.rel}:${f.line}\n      ${f.detail}`)
   }
 }
-
-fs.rmSync(WORK, { recursive: true, force: true })
 
 if (failures.length || runFailures.length) process.exit(1)
 console.log('\n✓ 完整程序全部编译通过；带期望值的示例输出与正文一致')
